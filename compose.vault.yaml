@@ -1,0 +1,33 @@
+services:
+  vault:
+    image: vault:1.13.3
+    container_name: vault
+    privileged: true
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./vault/config:/vault/config
+      - ./vault/policies:/vault/policies
+      - vault-data:/vault/data
+      - ./vault/logs:/vault/logs
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+    command: server
+    networks:
+      - vault-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  vault-data:
+    name: vault-data
+    labels:
+      - "Vault application data"        
+networks:
+  vault-network:
+    name: vault-network
